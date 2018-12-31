@@ -23,9 +23,9 @@
 This is the start point of this project, I didn't publish anything yet and this is **NOT READY TO USE OR TEST**!
 
 ## Roadmap
- - [ ] Use gitmoji-changelog to create the latest release changelog
+ - [x] Use gitmoji-changelog to create the latest release changelog
  - [ ] Let the user change its changelog text
- - [ ] Publish to github
+ - [x] Publish to github
  - [ ] Publish to npm
  - [ ] Publish to cargo
 
