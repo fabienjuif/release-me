@@ -16,3 +16,6 @@ serde = "1.0.83"
 serde_json = "1.0.33"
 gitmoji-changelog = "0.3.0"
 clap = "2.32.0"
+
+[profile.release]
+lto=true
