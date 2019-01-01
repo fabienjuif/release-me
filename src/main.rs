@@ -31,7 +31,10 @@ fn main() {
         .to_markdown(Some(release), matches.is_present("print-authors"));
 
     if matches.is_present("dry-run") {
-        println!("---------- dry-run ---------\n{}\n--------- !dry-run! --------", changelog);
+        println!(
+            "---------- dry-run ---------\n{}\n--------- !dry-run! --------",
+            changelog
+        );
         return;
     }
 
