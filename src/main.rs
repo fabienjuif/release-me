@@ -3,11 +3,15 @@ extern crate serde_derive;
 extern crate serde;
 #[macro_use]
 extern crate serde_json;
+#[macro_use]
+extern crate clap;
 
 use std::env;
 
 use gitmoji_changelog::Changelog;
 use reqwest::{Body, Client};
+
+mod cli;
 
 #[derive(Debug, Deserialize)]
 struct Response {
@@ -19,16 +23,25 @@ fn main() {
     let github_token =
         env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN environment variable must be set!");
 
-    let changelog = Changelog::from("../gitmoji-changelog", None)
+    let matches = cli::parse_args();
+    let release = matches.value_of("release").unwrap();
+
+    let changelog = Changelog::from(matches.value_of("path").unwrap(), None)
         .keep_last_version_only()
-        .to_markdown(Some("v1.0.6"), true);
+        .to_markdown(Some(release), matches.is_present("print-authors"));
+
+    if matches.is_present("dry-run") {
+        println!("---------- dry-run ---------\n{}\n--------- !dry-run! --------", changelog);
+        return;
+    }
 
     let body = json!({
-        "tag_name": "v1.0.6",
-        "name": "v1.0.6",
+        "tag_name": release,
+        "name": release,
         "body": changelog,
     });
-    let body = Body::from(body.to_string());
+    let body = body.to_string();
+    let body = Body::from(body);
 
     let client = Client::new();
     let response = client
