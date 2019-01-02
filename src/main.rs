@@ -7,6 +7,7 @@ extern crate serde_json;
 extern crate clap;
 #[macro_use]
 extern crate lazy_static;
+extern crate openssl_probe;
 
 use std::env;
 use std::path::Path;
@@ -29,6 +30,7 @@ struct Response {
 }
 
 fn main() {
+    openssl_probe::init_ssl_cert_env_vars();
     let github_token =
         env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN environment variable must be set!");
 
