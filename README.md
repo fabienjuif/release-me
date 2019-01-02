@@ -19,8 +19,13 @@
 </p>
 <br />
 
-## Caution!!
-This is the start point of this project, I didn't publish anything yet and this is **NOT READY TO USE OR TEST**!
+## Purpose
+The main purpose is to publish my lib with more ease.
+
+I want to have one simple command that:
+ - Generate a changelog from the last tag to HEAD
+ - Create the github release
+ - Publish to npm (or crates.io)
 
 ## Roadmap
  - [x] Use gitmoji-changelog to create the latest release changelog
@@ -28,6 +33,43 @@ This is the start point of this project, I didn't publish anything yet and this 
  - [x] Publish to github
  - [ ] Publish to npm
  - [ ] Publish to cargo
+
+## Try it
+### With Docker 🐳!
+```sh
+## set your github token
+## - the github token needs to have "repo" privileges
+## - you can create a new token here: https://github.com/settings/tokens/new
+export GITHUB_TOKEN="your token"
+
+## try it
+docker run --rm -e GITHUB_TOKEN=${GITHUB_TOKEN} -v ${PWD}:/repo fabienjuif/release-me /repo --release <your_version>
+# ex: docker run --rm -e GITHUB_TOKEN=${GITHUB_TOKEN} -v ${PWD}:/repo fabienjuif/release-me /repo --release
+
+## to see which options you can use:
+docker run --rm -e GITHUB_TOKEN=${GITHUB_TOKEN} fabienjuif/release-me --help
+```
+
+### With cargo
+```sh
+## install it
+cargo install release-me
+
+# maybe you should reset your env here (relaunch your terminal or type `zsh` (or `bash`))
+
+## set your github token
+## - the github token needs to have "repo" privileges
+## - you can create a new token here: https://github.com/settings/tokens/new
+export GITHUB_TOKEN="your token"
+
+## try it
+release-me . --release #<your_version>
+# ex: release-me . --release v0.1.0
+
+## to see which options you can use:
+release-me --help
+```
+
 
 ## Commands
 This project use a `Makefile`, here are the main targets:
