@@ -24,13 +24,19 @@ The main purpose is to publish my lib with more ease.
 
 I want to have one simple command that:
  - Generate a changelog from the last tag to HEAD
+ - Bump versions in differents files (Cargo.toml, package.json, etc)
+ - Create the commit for this release
+ - Create the tag for this release
  - Create the github release
  - Publish to npm (or crates.io)
 
 ## Roadmap
  - [x] Use gitmoji-changelog to create the latest release changelog
  - [ ] Let the user change its changelog text
- - [x] Publish to github
+ - [x] Commit the not indexes files
+ - [x] Create the tag
+ - [x] Push the tag
+ - [x] Create the github release
  - [ ] Publish to npm
  - [ ] Publish to cargo
 
