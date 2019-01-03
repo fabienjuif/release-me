@@ -12,7 +12,7 @@ extern crate openssl_probe;
 use std::env;
 use std::path::Path;
 
-use git2::Repository;
+use git2::{Commit, Index, IndexAddOption, ObjectType, Repository};
 use gitmoji_changelog::Changelog;
 use regex::Regex;
 use reqwest::{Body, Client};
@@ -27,6 +27,12 @@ lazy_static! {
 struct Response {
     message: Option<String>,
     html_url: Option<String>,
+}
+
+fn find_last_commit(repo: &Repository) -> Result<Commit, git2::Error> {
+    let obj = repo.head()?.resolve()?.peel(ObjectType::Commit)?;
+    obj.into_commit()
+        .map_err(|_| git2::Error::from_str("Couldn't find commit"))
 }
 
 fn main() {
@@ -44,14 +50,14 @@ fn main() {
 
     let repository = Path::new(&repository);
     let repository = Repository::open(repository).unwrap();
-    let repository = repository
+    let mut remote = repository
         .find_remote("origin")
         .expect("Remote origin should exists!");
-    let repository = repository.url().expect("Remote origin should exists!");
-    let repository = RE_REMOTE_SSH
-        .captures(repository)
+    let remote_url = remote.url().expect("Remote origin should exists!");
+    let repository_name = RE_REMOTE_SSH
+        .captures(remote_url)
         .expect("Could not find repository name in your \"remote origin\"");
-    let repository = repository
+    let repository_name = repository_name
         .get(1)
         .expect("Could not find repository name in your \"remote origin\"")
         .as_str();
@@ -65,10 +71,36 @@ ________ changelog ________
 _______ !changelog! _______
 Repository name: {}
 --------- !dry-run! --------",
-            changelog, repository,
+            changelog, repository_name,
         );
         return;
     }
+
+    let statuses = repository.statuses(None).unwrap();
+    let mut index = repository.index().unwrap();
+    for status in statuses.iter() {
+        // TODO: check if merge! -> Error
+        let path = Path::new(status.path().unwrap());
+        index.add_path(path);
+    }
+    index.write();
+    let oid = index.write_tree_to(&repository).unwrap();
+    let parent_commit = find_last_commit(&repository).unwrap();
+    let tree = repository.find_tree(oid).unwrap();
+    let signature = repository.signature().unwrap();
+    repository
+        .commit(
+            Some("HEAD"),
+            &signature,
+            &signature,
+            &format!(":bookmark: {}", release),
+            &tree,
+            &[&parent_commit],
+        )
+        .unwrap();
+    remote.push(&["refs/heads/master:refs/heads/master"], None).unwrap();
+
+    return;
 
     let body = json!({
         "tag_name": release,
@@ -82,7 +114,7 @@ Repository name: {}
     let response = client
         .post(&format!(
             "https://api.github.com/repos/{}/releases",
-            repository
+            repository_name
         ))
         .header("Authorization", format!("token {}", github_token))
         .header("Content-Type", "application/json")
