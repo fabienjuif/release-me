@@ -65,7 +65,9 @@ fn commit_tag_push(repository: &Repository, remote: &mut Remote, release: &str) 
     // tag
     println!("Tagging...");
     let commit_obj = repository.find_object(commit_oid, None).unwrap();
-    repository.tag_lightweight(release, &commit_obj, true).unwrap();
+    repository
+        .tag_lightweight(release, &commit_obj, true)
+        .unwrap();
 
     // push
     println!("Pushing...");
