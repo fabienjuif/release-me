@@ -35,7 +35,7 @@ fn find_last_commit(repository: &Repository) -> Result<Commit, git2::Error> {
         .map_err(|_| git2::Error::from_str("Couldn't find commit"))
 }
 
-fn commit_push(repository: &Repository, remote: &mut Remote, release: &str) {
+fn commit_tag_push(repository: &Repository, remote: &mut Remote, release: &str) {
     let statuses = repository.statuses(None).unwrap();
     let mut index = repository.index().unwrap();
     for status in statuses.iter() {
@@ -48,7 +48,10 @@ fn commit_push(repository: &Repository, remote: &mut Remote, release: &str) {
     let parent_commit = find_last_commit(&repository).unwrap();
     let tree = repository.find_tree(oid).unwrap();
     let signature = repository.signature().unwrap();
-    repository
+
+    // commit
+    println!("Committing...");
+    let commit_oid = repository
         .commit(
             Some("HEAD"),
             &signature,
@@ -59,6 +62,13 @@ fn commit_push(repository: &Repository, remote: &mut Remote, release: &str) {
         )
         .unwrap();
 
+    // tag
+    println!("Tagging...");
+    let commit_obj = repository.find_object(commit_oid, None).unwrap();
+    repository.tag_lightweight(release, &commit_obj, true).unwrap();
+
+    // push
+    println!("Pushing...");
     let mut callbacks = RemoteCallbacks::new();
     // look at https://github.com/rust-lang/cargo/blob/6a7672ef5344c1bb570610f2574250fbee932355/src/cargo/sources/git/utils.rs#L409-L617
     callbacks.credentials(|_url, user_name, _t| {
@@ -135,8 +145,9 @@ Repository name: {}
         return;
     }
 
-    commit_push(&repository, &mut remote, &release);
+    commit_tag_push(&repository, &mut remote, &release);
 
+    println!("Releasing (github)...");
     let body = json!({
         "tag_name": release,
         "name": release,
