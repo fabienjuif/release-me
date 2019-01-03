@@ -12,10 +12,7 @@ extern crate openssl_probe;
 use std::env;
 use std::path::Path;
 
-use git2::{
-    Commit, Cred, ObjectType, PushOptions,
-    Remote, RemoteCallbacks, Repository,
-};
+use git2::{Commit, Cred, ObjectType, PushOptions, Remote, RemoteCallbacks, Repository};
 use gitmoji_changelog::Changelog;
 use regex::Regex;
 use reqwest::{Body, Client};
