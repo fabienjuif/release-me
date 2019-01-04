@@ -30,6 +30,11 @@ I want to have one simple command that:
  - Create the github release
  - Publish to npm (or crates.io)
 
+## Examples
+Each releases of `release-me` are done with the version being released at the time. You can see these releases there: https://github.com/fabienjuif/release-me/releases
+
+I hope each version will be better and better 😁
+
 ## Roadmap
  - [x] Use gitmoji-changelog to create the latest release changelog
  - [ ] Let the user change its changelog text
