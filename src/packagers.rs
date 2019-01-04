@@ -1,6 +1,6 @@
+use regex::Regex;
 use std::fs;
 use std::path::Path;
-use regex::Regex;
 
 use serde_json::{self, Value};
 
@@ -12,7 +12,7 @@ lazy_static! {
 
 pub struct Packagers {
     packagers: Vec<&'static str>,
-    files: Vec<String>
+    files: Vec<String>,
 }
 
 impl Packagers {
@@ -30,10 +30,7 @@ impl Packagers {
             files.push(format!("{}/Cargo.toml", path));
         }
 
-        Packagers {
-            packagers,
-            files,
-        }
+        Packagers { packagers, files }
     }
 
     pub fn which(&self) -> &Vec<&str> {
@@ -41,7 +38,12 @@ impl Packagers {
     }
 
     pub fn bump_all(&self, release: &str) {
-        let release = RE_REMOVE_V.captures(release).unwrap().get(1).unwrap().as_str();
+        let release = RE_REMOVE_V
+            .captures(release)
+            .unwrap()
+            .get(1)
+            .unwrap()
+            .as_str();
 
         for (packager, path) in self.packagers.iter().zip(self.files.iter()) {
             let mut content = fs::read_to_string(path).expect("Can't read file :(");
@@ -49,12 +51,16 @@ impl Packagers {
             match packager {
                 &"npm" => {
                     let replacement = format!("$1\"{}\"$3", release);
-                    let after = RE_VERSION_NPM.replace(&content, replacement.as_str()).into_owned();
+                    let after = RE_VERSION_NPM
+                        .replace(&content, replacement.as_str())
+                        .into_owned();
                     fs::write(path, after).unwrap();
-                },
+                }
                 &"cargo" => {
                     let replacement = format!("$1\"{}\"", release);
-                    let after = RE_VERSION_CARGO.replace(&content, replacement.as_str()).into_owned();
+                    let after = RE_VERSION_CARGO
+                        .replace(&content, replacement.as_str())
+                        .into_owned();
                     fs::write(path, after).unwrap();
                 }
                 _ => panic!("Unknown packager: {}", packager),
