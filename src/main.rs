@@ -10,9 +10,11 @@ extern crate lazy_static;
 extern crate openssl_probe;
 
 mod cli;
+mod packagers;
 mod repository;
 mod service;
 
+use crate::packagers::Packagers;
 use crate::repository::Repository;
 
 fn main() {
@@ -21,10 +23,16 @@ fn main() {
     let matches = cli::parse_args();
     let release = matches.value_of("release").unwrap();
 
-    let mut repository = Repository::new(matches.value_of("path").unwrap(), release);
+    let path = matches.value_of("path").unwrap();
+    let mut repository = Repository::new(path, release);
     let changelog = repository.changelog(matches.is_present("print-authors"));
     let repository_name = repository.name();
 
+    let packagers = Packagers::from(path);
+
+    packagers.bump_all(release);
+
+    return;
     if matches.is_present("dry-run") {
         println!(
             "---------- dry-run ---------
@@ -33,8 +41,17 @@ ________ changelog ________
 {}
 _______ !changelog! _______
 Repository name: {}
+Packagers found: {}
 --------- !dry-run! --------",
-            changelog, repository_name,
+            changelog,
+            repository_name,
+            packagers
+                .which()
+                .iter()
+                .fold(String::from(""), |acc, curr| format!(
+                    "{}\n  - {}",
+                    acc, curr
+                ),),
         );
         return;
     }
