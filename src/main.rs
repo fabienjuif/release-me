@@ -30,7 +30,7 @@ fn main() {
 
     let packagers = Packagers::from(path);
 
-    packagers.bump_all();
+    packagers.bump_all(release);
 
     return;
     if matches.is_present("dry-run") {

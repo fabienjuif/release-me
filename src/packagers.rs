@@ -1,8 +1,16 @@
 use std::fs;
 use std::path::Path;
+use regex::Regex;
+
+use serde_json::{self, Value};
+
+lazy_static! {
+    static ref RE_REMOVE_V: Regex = Regex::new(r"v?(.*)").unwrap();
+    static ref RE_VERSION_NPM: Regex = Regex::new("(.*\"version\" ?: ?)(\".*?\")(.*)").unwrap();
+    static ref RE_VERSION_CARGO: Regex = Regex::new("(version ?= ?)(\".*?\")").unwrap();
+}
 
 pub struct Packagers {
-    path: String,
     packagers: Vec<&'static str>,
     files: Vec<String>
 }
@@ -23,7 +31,6 @@ impl Packagers {
         }
 
         Packagers {
-            path: String::from(path),
             packagers,
             files,
         }
@@ -33,27 +40,25 @@ impl Packagers {
         &self.packagers
     }
 
-    pub fn bump_all(&self) {
+    pub fn bump_all(&self, release: &str) {
+        let release = RE_REMOVE_V.captures(release).unwrap().get(1).unwrap().as_str();
+
         for (packager, path) in self.packagers.iter().zip(self.files.iter()) {
-            let file = fs::read_to_string(path).expect("Can't read file :(");
+            let mut content = fs::read_to_string(path).expect("Can't read file :(");
 
             match packager {
                 &"npm" => {
-                    println!("TODO: parse {}", file);
-                    println!("TODO: bump version {}", path);
-                    println!("TODO: save {}", path);
+                    let replacement = format!("$1\"{}\"$3", release);
+                    let after = RE_VERSION_NPM.replace(&content, replacement.as_str()).into_owned();
+                    fs::write(path, after).unwrap();
                 },
                 &"cargo" => {
-                    println!("TODO: parse {}", file);
-                    println!("TODO: bump version {}", path);
-                    println!("TODO: save {}", path);
+                    let replacement = format!("$1\"{}\"", release);
+                    let after = RE_VERSION_CARGO.replace(&content, replacement.as_str()).into_owned();
+                    fs::write(path, after).unwrap();
                 }
                 _ => panic!("Unknown packager: {}", packager),
             }
         }
-        // TODO:
-        // parse JSON
-        // Bump version
-        // rewrite file
     }
 }

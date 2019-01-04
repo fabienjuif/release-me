@@ -1,6 +1,6 @@
 [package]
 name = "release-me"
-version = "0.1.0"
+version = "1.0.9"
 authors = ["Fabien JUIF <fabien.juif@gmail.com>"]
 edition = "2018"
 license = "MIT"
