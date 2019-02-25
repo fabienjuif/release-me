@@ -5,6 +5,7 @@ use git2::{
     Commit, Cred, ObjectType, PushOptions, Remote, RemoteCallbacks, Repository as GitRepository,
 };
 use gitmoji_changelog::Changelog;
+use gitmoji_changelog::Error;
 use regex::Regex;
 
 lazy_static! {
@@ -111,7 +112,7 @@ impl Repository {
             .unwrap();
     }
 
-    pub fn changelog(&self, print_authors: bool) -> String {
+    pub fn changelog(&self, print_authors: bool) -> Result<String, Error> {
         Changelog::from(&self.path, None)
             .keep_last_version_only()
             .to_markdown(Some(&self.release), print_authors)
