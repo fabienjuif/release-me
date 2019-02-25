@@ -22,7 +22,7 @@ fn main() {
     let release = matches.value_of("release").unwrap();
 
     let mut repository = Repository::new(matches.value_of("path").unwrap(), release);
-    let changelog = repository.changelog(matches.is_present("print-authors"));
+    let changelog = repository.changelog(matches.is_present("print-authors")).expect("Something wrong happened with gitmoji_changelog");
     let repository_name = repository.name();
 
     if matches.is_present("dry-run") {
